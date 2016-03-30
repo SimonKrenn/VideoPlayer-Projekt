@@ -21,23 +21,22 @@ import javafx.stage.Stage;
  * @author schmizzle
  */
 public class Videoplayer extends Application {
-     
+
     @Override
     public void start(Stage primaryStage) {
-        String video = "file:///D:/Schule/vids/Sequenz.mp4";
-        
+        String video = "file:///Schule/vids/Sequenz.mp4";
+
         //Via Methode URL uebergeben
-        
-         Media media = new Media(video);
-         MediaPlayer player = new MediaPlayer ( media );
-         MediaView view = new MediaView ( player ) ;
-        
+        Media media = new Media(video);
+        MediaPlayer player = new MediaPlayer(media);
+        MediaView view = new MediaView(player);
+
         StackPane root = new StackPane();
-        
+
         root.getChildren().addAll(view);
         
         Scene scene = new Scene(root, 300, 250);
-        
+
         primaryStage.setTitle("Player");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -49,5 +48,5 @@ public class Videoplayer extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
