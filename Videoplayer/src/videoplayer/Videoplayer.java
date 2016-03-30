@@ -10,7 +10,10 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -25,17 +28,23 @@ public class Videoplayer extends Application {
     @Override
     public void start(Stage primaryStage) {
         String video = "file:///Schule/vids/Sequenz.mp4";
+        VBox toolbar = new VBox(1000);
+        toolbar.setStyle("-fx-background-color: #444;");
+        toolbar.setMinHeight(100);
 
         //Via Methode URL uebergeben
         Media media = new Media(video);
         MediaPlayer player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
 
-        StackPane root = new StackPane();
-
-        root.getChildren().addAll(view);
         
-        Scene scene = new Scene(root, 300, 250);
+        view.setFitHeight(500.0);
+        BorderPane root = new BorderPane();
+
+        root.setCenter(view);
+        root.setBottom(toolbar);
+        player.play();
+        Scene scene = new Scene(root, 1000, 700);
 
         primaryStage.setTitle("Player");
         primaryStage.setScene(scene);
