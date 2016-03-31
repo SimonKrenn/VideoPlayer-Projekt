@@ -10,8 +10,10 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -27,26 +29,39 @@ public class Videoplayer extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        String video = "file:///Schule/vids/Sequenz.mp4";
+        String video = "file:///Users/in110072/asdf.mp4";
         Media media = new Media(video);
         MediaPlayer player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
-        VBox toolbar = new VBox(1000);
+        
+        HBox toolbar = new HBox();
         toolbar.setStyle("-fx-background-color: #444;");
-        toolbar.setMinHeight(100);
+        toolbar.setMaxHeight(300.0);
+
+        Button play = new Button("Play");
+        Button pause = new Button("Pause");
+
+        Slider timebar = new Slider(0, 100, 0);
         
-        Button play = new Button();
-        Button stop = new Button();
-        Button pause = new Button();
-        
-        toolbar.getChildren().addAll(play,stop,pause);
-        
-        view.setFitHeight(500.0);
+        play.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                player.play();
+            }
+        });
+        pause.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                player.pause();
+            }
+        });
+
+        toolbar.getChildren().addAll(play, pause);
         BorderPane root = new BorderPane();
 
         root.setCenter(view);
         root.setBottom(toolbar);
-        player.play();
+        
         Scene scene = new Scene(root, 1000, 700);
 
         primaryStage.setTitle("Player");
