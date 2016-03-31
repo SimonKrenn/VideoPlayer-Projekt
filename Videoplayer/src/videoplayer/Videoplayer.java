@@ -28,15 +28,18 @@ public class Videoplayer extends Application {
     @Override
     public void start(Stage primaryStage) {
         String video = "file:///Schule/vids/Sequenz.mp4";
-        VBox toolbar = new VBox(1000);
-        toolbar.setStyle("-fx-background-color: #444;");
-        toolbar.setMinHeight(100);
-
-        //Via Methode URL uebergeben
         Media media = new Media(video);
         MediaPlayer player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
-
+        VBox toolbar = new VBox(1000);
+        toolbar.setStyle("-fx-background-color: #444;");
+        toolbar.setMinHeight(100);
+        
+        Button play = new Button();
+        Button stop = new Button();
+        Button pause = new Button();
+        
+        toolbar.getChildren().addAll(play,stop,pause);
         
         view.setFitHeight(500.0);
         BorderPane root = new BorderPane();
