@@ -5,12 +5,19 @@
  */
 package videoplayer;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -19,7 +26,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
  *
@@ -27,46 +37,104 @@ import javafx.stage.Stage;
  */
 public class Videoplayer extends Application {
 
+     Group root = new Group();
+    
     @Override
-    public void start(Stage primaryStage) {
-        String video = "file:///Users/in110072/asdf.mp4";
-        Media media = new Media(video);
-        MediaPlayer player = new MediaPlayer(media);
+
+    public void start(final Stage stage) throws Exception {
+        stage.setTitle("Movie Player");
+        Group root = new Group();
+
+       
+        Media media = new Media("file:///users/schmizzle/desktop/slowmo.mp4");
+        final MediaPlayer player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
-        
-        HBox toolbar = new HBox();
-        toolbar.setStyle("-fx-background-color: #444;");
-        toolbar.setMaxHeight(300.0);
 
-        Button play = new Button("Play");
-        Button pause = new Button("Pause");
-
-        Slider timebar = new Slider(0, 100, 0);
-        
-        play.setOnAction(new EventHandler<ActionEvent>() {
+//        System.out.println("media.width: "+media.getWidth());
+        final Timeline slideIn = new Timeline();
+        final Timeline slideOut = new Timeline();
+        root.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
-            public void handle(ActionEvent e) {
-                player.play();
+            public void handle(MouseEvent mouseEvent) {
+                slideOut.play();
             }
         });
-        pause.setOnAction(new EventHandler<ActionEvent>() {
+        root.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
-            public void handle(ActionEvent e) {
-                player.pause();
+            public void handle(MouseEvent mouseEvent) {
+                slideIn.play();
             }
         });
+        final VBox vbox = new VBox();
+        final Slider slider = new Slider();
+        vbox.getChildren().add(slider);
 
-        toolbar.getChildren().addAll(play, pause);
-        BorderPane root = new BorderPane();
+    
 
-        root.setCenter(view);
-        root.setBottom(toolbar);
+        root.getChildren().add(view);
+        root.getChildren().add(vbox);
+
+        Scene scene = new Scene(root, 400, 400, Color.BLACK);
+        stage.setScene(scene);
+        stage.show();
+
+        player.play();
+        player.setOnReady(new Runnable() {
+            @Override
+            public void run() {
+                int w = player.getMedia().getWidth();
+                int h = player.getMedia().getHeight();
+
+
+                stage.setMinWidth(w);
+                stage.setMinHeight(h);
+
+                vbox.setMinSize(w, 100);
+                vbox.setTranslateY(h - 100);
+
+                slider.setMin(0.0);
+                slider.setValue(0.0);
+                slider.setMax(player.getTotalDuration().toSeconds());
+
+                slideOut.getKeyFrames().addAll(
+                        new KeyFrame(new Duration(0),
+                                new KeyValue(vbox.translateYProperty(), h - 100),
+                                new KeyValue(vbox.opacityProperty(), 0.9)
+                        ),
+                        new KeyFrame(new Duration(300),
+                                new KeyValue(vbox.translateYProperty(), h),
+                                new KeyValue(vbox.opacityProperty(), 0.0)
+                        )
+                );
+                slideIn.getKeyFrames().addAll(
+                        new KeyFrame(new Duration(0),
+                                new KeyValue(vbox.translateYProperty(), h),
+                                new KeyValue(vbox.opacityProperty(), 0.0)
+                        ),
+                        new KeyFrame(new Duration(300),
+                                new KeyValue(vbox.translateYProperty(), h - 100),
+                                new KeyValue(vbox.opacityProperty(), 0.9)
+                        )
+                );
+            }
+        });
+        player.currentTimeProperty().addListener(new ChangeListener<Duration>() {
+            @Override
+            public void changed(ObservableValue<? extends Duration> observableValue, Duration duration, Duration current) {
+                slider.setValue(current.toSeconds());
+            }
+        });
+        slider.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                player.seek(Duration.seconds(slider.getValue()));
+            }
+        });
         
-        Scene scene = new Scene(root, 1000, 700);
-
-        primaryStage.setTitle("Player");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        
+        
+        
+        
     }
 
     /**
