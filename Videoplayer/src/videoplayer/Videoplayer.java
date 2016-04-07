@@ -35,19 +35,31 @@ import javafx.util.Duration;
  *
  * @author schmizzle
  */
-public class Videoplayer extends Application {
-
-     Group root = new Group();
+public class Videoplayer extends Application implements EventHandler<ActionEvent> {
+    //Aufgabe: zum fertigstellen
+    /**
+     * Play, Pause button richtig positionieren
+     * Funktionsweise von Playlist besprechen
+     * Implementieren der Playlist
+     * CSS und so
+     */
+    Group root = new Group();
+    MediaPlayer player;
+    Button play = new Button("Play");
+    Button pause = new Button("Pause");
+    
     
     @Override
 
     public void start(final Stage stage) throws Exception {
+        BorderPane placeable = new BorderPane();
         stage.setTitle("Movie Player");
         Group root = new Group();
-
+        
+        play.setOnAction(this);
        
-        Media media = new Media("file:///users/schmizzle/desktop/slowmo.mp4");
-        final MediaPlayer player = new MediaPlayer(media);
+        Media media = new Media("file:///C:/Videos/GTA5.mp4");
+        player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
 
 //        System.out.println("media.width: "+media.getWidth());
@@ -69,16 +81,19 @@ public class Videoplayer extends Application {
         final Slider slider = new Slider();
         vbox.getChildren().add(slider);
 
-    
+        
 
         root.getChildren().add(view);
         root.getChildren().add(vbox);
-
-        Scene scene = new Scene(root, 400, 400, Color.BLACK);
+        
+        placeable.setCenter(root);
+        placeable.setBottom(play);
+        
+        Scene scene = new Scene(placeable, 400, 400, Color.BLACK);
         stage.setScene(scene);
         stage.show();
 
-        player.play();
+        
         player.setOnReady(new Runnable() {
             @Override
             public void run() {
@@ -142,6 +157,13 @@ public class Videoplayer extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void handle(ActionEvent event) {
+        if (event.getSource() == play) {
+            player.play();
+        }
     }
 
 }
