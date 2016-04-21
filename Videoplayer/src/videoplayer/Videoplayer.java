@@ -9,6 +9,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -21,6 +24,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -36,28 +40,28 @@ import javafx.util.Duration;
  * @author schmizzle
  */
 public class Videoplayer extends Application implements EventHandler<ActionEvent> {
+
     //Aufgabe: zum fertigstellen
     /**
-     * Play, Pause button richtig positionieren
-     * Funktionsweise von Playlist besprechen
-     * Implementieren der Playlist
-     * CSS und so
+     * Play, Pause button richtig positionieren Funktionsweise von Playlist
+     * besprechen Implementieren der Playlist CSS und so
      */
     Group root = new Group();
     MediaPlayer player;
     Button play = new Button("Play");
     Button pause = new Button("Pause");
-    
-    
+    private Slider volumeSlider;
+
     @Override
 
     public void start(final Stage stage) throws Exception {
-        BorderPane placeable = new BorderPane();
+        BorderPane uiPlacer = new BorderPane();
         stage.setTitle("Movie Player");
         Group root = new Group();
-        
+
         play.setOnAction(this);
-       
+        pause.setOnAction(this);
+
         Media media = new Media("file:///C:/Videos/GTA5.mp4");
         player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
@@ -80,26 +84,39 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
         final VBox vbox = new VBox();
         final Slider slider = new Slider();
         vbox.getChildren().add(slider);
-
         
+        volumeSlider = new Slider();
+        volumeSlider.setPrefWidth(70);
+        volumeSlider.setMaxWidth(Region.USE_PREF_SIZE);
+        volumeSlider.setMinWidth(30);
+
+        volumeSlider.valueProperty().addListener(new InvalidationListener() {
+            public void invalidated(Observable ov) {
+                if (volumeSlider.isValueChanging()) {
+                    player.setVolume(volumeSlider.getValue() / 100.0);
+                }
+            }
+        });
+
+        VBox buttons = new VBox();
 
         root.getChildren().add(view);
         root.getChildren().add(vbox);
-        
-        placeable.setCenter(root);
-        placeable.setBottom(play);
-        
-        Scene scene = new Scene(placeable, 400, 400, Color.BLACK);
+
+        uiPlacer.setCenter(root);
+        buttons.getChildren().addAll(play, pause, volumeSlider);
+        uiPlacer.setLeft(buttons);
+
+        Scene scene = new Scene(uiPlacer, 400, 400, Color.BLACK);
         stage.setScene(scene);
         stage.show();
-
         
+
         player.setOnReady(new Runnable() {
             @Override
             public void run() {
                 int w = player.getMedia().getWidth();
                 int h = player.getMedia().getHeight();
-
 
                 stage.setMinWidth(w);
                 stage.setMinHeight(h);
@@ -145,16 +162,21 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 player.seek(Duration.seconds(slider.getValue()));
             }
         });
-        
-        
-        
-        
-        
     }
+    
+    protected void updateValues() {
+  if (volumeSlider != null) {
+     Platform.runLater(new Runnable() {
+        public void run() {
+        if (!volumeSlider.isValueChanging()) {
+            volumeSlider.setValue((int)Math.round(player.getVolume() 
+                  * 100));
+          }
+        }
+     });
+  }
+}
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }
@@ -163,6 +185,8 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
     public void handle(ActionEvent event) {
         if (event.getSource() == play) {
             player.play();
+        } else if (event.getSource() == pause) {
+            player.pause();
         }
     }
 
