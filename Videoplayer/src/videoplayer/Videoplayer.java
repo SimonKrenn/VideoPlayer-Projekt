@@ -37,38 +37,39 @@ import javafx.util.Duration;
 
 /**
  *
- * @author schmizzle
+ * @author Krenn Simon, Hagn Sven, Audil Rowa
  */
 public class Videoplayer extends Application implements EventHandler<ActionEvent> {
-
-    //Aufgabe: zum fertigstellen
-    /**
-     * Play, Pause button richtig positionieren Funktionsweise von Playlist
-     * besprechen Implementieren der Playlist CSS und so
-     */
     Group root = new Group();
     MediaPlayer player;
     Button play = new Button("Play");
     Button pause = new Button("Pause");
+    Button repeat = new Button("Reapet");
     private Slider volumeSlider;
 
     @Override
 
     public void start(final Stage stage) throws Exception {
+        final Timeline slideIn = new Timeline();
+        final Timeline slideOut = new Timeline();
+        final VBox sliderBox = new VBox();
+        final VBox slideAndViewBox = new VBox();
+        final Slider slider = new Slider();
+        
+        Media media = new Media("file:///C:/Videos/GTA5.mp4");
+        player = new MediaPlayer(media);
+        MediaView view = new MediaView(player);
+        
         BorderPane uiPlacer = new BorderPane();
-        stage.setTitle("Movie Player");
+        stage.setTitle("Snitch-Player");
         Group root = new Group();
 
         play.setOnAction(this);
         pause.setOnAction(this);
+        repeat.setOnAction(this);
+        
+        view.setFitHeight(300.0);
 
-        Media media = new Media("file:///C:/Videos/GTA5.mp4");
-        player = new MediaPlayer(media);
-        MediaView view = new MediaView(player);
-
-//        System.out.println("media.width: "+media.getWidth());
-        final Timeline slideIn = new Timeline();
-        final Timeline slideOut = new Timeline();
         root.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
@@ -81,13 +82,15 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 slideIn.play();
             }
         });
-        final VBox vbox = new VBox();
-        final Slider slider = new Slider();
-        vbox.getChildren().add(slider);
         
+        slideAndViewBox.setMaxWidth(view.getFitHeight());
+        
+        sliderBox.getChildren().addAll(slider);
+        slideAndViewBox.getChildren().addAll(view, sliderBox);
+
         volumeSlider = new Slider();
         volumeSlider.setPrefWidth(70);
-        volumeSlider.setMaxWidth(Region.USE_PREF_SIZE);
+        //volumeSlider.setMaxWidth(Region.USE_PREF_SIZE);
         volumeSlider.setMinWidth(30);
 
         volumeSlider.valueProperty().addListener(new InvalidationListener() {
@@ -97,20 +100,18 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 }
             }
         });
-
         VBox buttons = new VBox();
 
         root.getChildren().add(view);
-        root.getChildren().add(vbox);
+        root.getChildren().add(sliderBox);
 
         uiPlacer.setCenter(root);
-        buttons.getChildren().addAll(play, pause, volumeSlider);
-        uiPlacer.setLeft(buttons);
+        buttons.getChildren().addAll(play, pause, repeat, volumeSlider);
+        uiPlacer.setBottom(buttons);
 
         Scene scene = new Scene(uiPlacer, 400, 400, Color.BLACK);
         stage.setScene(scene);
         stage.show();
-        
 
         player.setOnReady(new Runnable() {
             @Override
@@ -121,8 +122,8 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 stage.setMinWidth(w);
                 stage.setMinHeight(h);
 
-                vbox.setMinSize(w, 100);
-                vbox.setTranslateY(h - 100);
+                sliderBox.setMinSize(w, 100);
+                sliderBox.setTranslateY(h - 100);
 
                 slider.setMin(0.0);
                 slider.setValue(0.0);
@@ -130,22 +131,22 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
 
                 slideOut.getKeyFrames().addAll(
                         new KeyFrame(new Duration(0),
-                                new KeyValue(vbox.translateYProperty(), h - 100),
-                                new KeyValue(vbox.opacityProperty(), 0.9)
+                                new KeyValue(sliderBox.translateYProperty(), h - 100),
+                                new KeyValue(sliderBox.opacityProperty(), 0.9)
                         ),
                         new KeyFrame(new Duration(300),
-                                new KeyValue(vbox.translateYProperty(), h),
-                                new KeyValue(vbox.opacityProperty(), 0.0)
+                                new KeyValue(sliderBox.translateYProperty(), h),
+                                new KeyValue(sliderBox.opacityProperty(), 0.0)
                         )
                 );
                 slideIn.getKeyFrames().addAll(
                         new KeyFrame(new Duration(0),
-                                new KeyValue(vbox.translateYProperty(), h),
-                                new KeyValue(vbox.opacityProperty(), 0.0)
+                                new KeyValue(sliderBox.translateYProperty(), h),
+                                new KeyValue(sliderBox.opacityProperty(), 0.0)
                         ),
                         new KeyFrame(new Duration(300),
-                                new KeyValue(vbox.translateYProperty(), h - 100),
-                                new KeyValue(vbox.opacityProperty(), 0.9)
+                                new KeyValue(sliderBox.translateYProperty(), h - 100),
+                                new KeyValue(sliderBox.opacityProperty(), 0.9)
                         )
                 );
             }
@@ -163,19 +164,19 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
             }
         });
     }
-    
-    protected void updateValues() {
-  if (volumeSlider != null) {
-     Platform.runLater(new Runnable() {
-        public void run() {
-        if (!volumeSlider.isValueChanging()) {
-            volumeSlider.setValue((int)Math.round(player.getVolume() 
-                  * 100));
-          }
+
+    void updateValues() {
+        if (volumeSlider != null) {
+            Platform.runLater(new Runnable() {
+                public void run() {
+                    if (!volumeSlider.isValueChanging()) {
+                        volumeSlider.setValue((int) Math.round(player.getVolume()
+                                * 100));
+                    }
+                }
+            });
         }
-     });
-  }
-}
+    }
 
     public static void main(String[] args) {
         launch(args);
@@ -187,7 +188,9 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
             player.play();
         } else if (event.getSource() == pause) {
             player.pause();
+        } else if (event.getSource() == repeat) {
+            player.stop();
+            player.play();
         }
     }
-
 }
