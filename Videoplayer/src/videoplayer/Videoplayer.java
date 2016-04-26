@@ -5,6 +5,7 @@
  */
 package videoplayer;
 
+import java.awt.geom.Rectangle2D;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -32,6 +33,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -40,59 +42,53 @@ import javafx.util.Duration;
  * @author Krenn Simon, Hagn Sven, Audil Rowa
  */
 public class Videoplayer extends Application implements EventHandler<ActionEvent> {
+
     Group root = new Group();
     MediaPlayer player;
     Button play = new Button("Play");
     Button pause = new Button("Pause");
-    Button repeat = new Button("Reapet");
+    Button repeat = new Button("Repeat");
     private Slider volumeSlider;
+    //inside that is the mediaplayer
+    VBox videos = new VBox();
+    //inside that are the buttons and the sliders
+    VBox uiElements = new VBox();
 
     @Override
 
     public void start(final Stage stage) throws Exception {
+        StackPane viewing = new StackPane();
+
+        javafx.geometry.Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+
         final Timeline slideIn = new Timeline();
         final Timeline slideOut = new Timeline();
-        final VBox sliderBox = new VBox();
-        final VBox slideAndViewBox = new VBox();
         final Slider slider = new Slider();
-        
+
         Media media = new Media("file:///C:/Videos/GTA5.mp4");
         player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
-        
-        BorderPane uiPlacer = new BorderPane();
-        stage.setTitle("Snitch-Player");
-        Group root = new Group();
 
         play.setOnAction(this);
         pause.setOnAction(this);
         repeat.setOnAction(this);
-        
-        view.setFitHeight(300.0);
 
-        root.setOnMouseExited(new EventHandler<MouseEvent>() {
+        viewing.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 slideOut.play();
             }
         });
-        root.setOnMouseEntered(new EventHandler<MouseEvent>() {
+        viewing.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 slideIn.play();
             }
         });
-        
-        slideAndViewBox.setMaxWidth(view.getFitHeight());
-        
-        sliderBox.getChildren().addAll(slider);
-        slideAndViewBox.getChildren().addAll(view, sliderBox);
 
         volumeSlider = new Slider();
         volumeSlider.setPrefWidth(70);
-        //volumeSlider.setMaxWidth(Region.USE_PREF_SIZE);
         volumeSlider.setMinWidth(30);
-
         volumeSlider.valueProperty().addListener(new InvalidationListener() {
             public void invalidated(Observable ov) {
                 if (volumeSlider.isValueChanging()) {
@@ -100,16 +96,24 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 }
             }
         });
+
         VBox buttons = new VBox();
+        HBox buttAndVol = new HBox();
+        VBox sliderAndB = new VBox();
+        VBox centeralignment = new VBox();
+        centeralignment.setMinWidth(primaryScreenBounds.getWidth() / 2 - 250);
+        System.out.println(primaryScreenBounds.getWidth());
 
-        root.getChildren().add(view);
-        root.getChildren().add(sliderBox);
+        buttons.getChildren().addAll(play, pause, repeat);
+        buttAndVol.getChildren().addAll(centeralignment, buttons, volumeSlider);
+        sliderAndB.getChildren().addAll(slider, buttAndVol);
 
-        uiPlacer.setCenter(root);
-        buttons.getChildren().addAll(play, pause, repeat, volumeSlider);
-        uiPlacer.setBottom(buttons);
+        videos.getChildren().addAll(view);
+        uiElements.getChildren().addAll(sliderAndB);
+        viewing.getChildren().addAll(videos, uiElements);
 
-        Scene scene = new Scene(uiPlacer, 400, 400, Color.BLACK);
+        Scene scene = new Scene(viewing, 400, 400, Color.BLACK);
+        scene.getStylesheets().add("css/main.css");
         stage.setScene(scene);
         stage.show();
 
@@ -122,8 +126,8 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 stage.setMinWidth(w);
                 stage.setMinHeight(h);
 
-                sliderBox.setMinSize(w, 100);
-                sliderBox.setTranslateY(h - 100);
+                uiElements.setMinSize(w, 100);
+                uiElements.setTranslateY(h - 100);
 
                 slider.setMin(0.0);
                 slider.setValue(0.0);
@@ -131,22 +135,22 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
 
                 slideOut.getKeyFrames().addAll(
                         new KeyFrame(new Duration(0),
-                                new KeyValue(sliderBox.translateYProperty(), h - 100),
-                                new KeyValue(sliderBox.opacityProperty(), 0.9)
+                                new KeyValue(uiElements.translateYProperty(), h - 100),
+                                new KeyValue(uiElements.opacityProperty(), 0.9)
                         ),
                         new KeyFrame(new Duration(300),
-                                new KeyValue(sliderBox.translateYProperty(), h),
-                                new KeyValue(sliderBox.opacityProperty(), 0.0)
+                                new KeyValue(uiElements.translateYProperty(), h),
+                                new KeyValue(uiElements.opacityProperty(), 0.0)
                         )
                 );
                 slideIn.getKeyFrames().addAll(
                         new KeyFrame(new Duration(0),
-                                new KeyValue(sliderBox.translateYProperty(), h),
-                                new KeyValue(sliderBox.opacityProperty(), 0.0)
+                                new KeyValue(uiElements.translateYProperty(), h),
+                                new KeyValue(uiElements.opacityProperty(), 0.0)
                         ),
                         new KeyFrame(new Duration(300),
-                                new KeyValue(sliderBox.translateYProperty(), h - 100),
-                                new KeyValue(sliderBox.opacityProperty(), 0.9)
+                                new KeyValue(uiElements.translateYProperty(), h - 100),
+                                new KeyValue(uiElements.opacityProperty(), 0.9)
                         )
                 );
             }
