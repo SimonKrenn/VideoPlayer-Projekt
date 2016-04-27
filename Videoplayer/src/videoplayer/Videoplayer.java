@@ -53,22 +53,26 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
     VBox videos = new VBox();
     //inside that are the buttons and the sliders
     VBox uiElements = new VBox();
+    javafx.geometry.Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
 
     @Override
 
     public void start(final Stage stage) throws Exception {
         StackPane viewing = new StackPane();
 
-        javafx.geometry.Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        
 
         final Timeline slideIn = new Timeline();
         final Timeline slideOut = new Timeline();
         final Slider slider = new Slider();
 
-        Media media = new Media("file:///C:/Videos/GTA5.mp4");
+        Media media = new Media("file:///C:/Videos/GTA.mp4");
         player = new MediaPlayer(media);
         MediaView view = new MediaView(player);
-
+        player.play();
+        player.stop();
+        viewing.setMinWidth(primaryScreenBounds.getWidth());
+        
         play.setOnAction(this);
         pause.setOnAction(this);
         repeat.setOnAction(this);
@@ -87,6 +91,7 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
         });
 
         volumeSlider = new Slider();
+        volumeSlider.setValue(100);
         volumeSlider.setPrefWidth(70);
         volumeSlider.setMinWidth(30);
         volumeSlider.valueProperty().addListener(new InvalidationListener() {
@@ -102,6 +107,7 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
         VBox sliderAndB = new VBox();
         VBox centeralignment = new VBox();
         centeralignment.setMinWidth(primaryScreenBounds.getWidth() / 2 - 250);
+        System.out.println(media.getWidth());
 
         buttons.getChildren().addAll(pause, play, repeat);
         buttAndVol.getChildren().addAll(centeralignment, buttons, volumeSlider);
@@ -110,8 +116,8 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
         videos.getChildren().addAll(view);
         uiElements.getChildren().addAll(sliderAndB);
         viewing.getChildren().addAll(videos, uiElements);
-
-        Scene scene = new Scene(viewing, view.getX(), 400, Color.BLACK);
+        
+        Scene scene = new Scene(viewing, media.getWidth(), media.getHeight(), Color.BLACK);
         scene.getStylesheets().add("css/main.css");
         stage.setScene(scene);
         stage.show();
@@ -131,7 +137,7 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 slider.setMin(0.0);
                 slider.setValue(0.0);
                 slider.setMax(player.getTotalDuration().toSeconds());
-
+                
                 slideOut.getKeyFrames().addAll(
                         new KeyFrame(new Duration(0),
                                 new KeyValue(uiElements.translateYProperty(), h - 100),
