@@ -97,14 +97,13 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
             }
         });
 
-        VBox buttons = new VBox();
+        HBox buttons = new HBox();
         HBox buttAndVol = new HBox();
         VBox sliderAndB = new VBox();
         VBox centeralignment = new VBox();
         centeralignment.setMinWidth(primaryScreenBounds.getWidth() / 2 - 250);
-        System.out.println(primaryScreenBounds.getWidth());
 
-        buttons.getChildren().addAll(play, pause, repeat);
+        buttons.getChildren().addAll(pause, play, repeat);
         buttAndVol.getChildren().addAll(centeralignment, buttons, volumeSlider);
         sliderAndB.getChildren().addAll(slider, buttAndVol);
 
@@ -112,7 +111,7 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
         uiElements.getChildren().addAll(sliderAndB);
         viewing.getChildren().addAll(videos, uiElements);
 
-        Scene scene = new Scene(viewing, 400, 400, Color.BLACK);
+        Scene scene = new Scene(viewing, view.getX(), 400, Color.BLACK);
         scene.getStylesheets().add("css/main.css");
         stage.setScene(scene);
         stage.show();
