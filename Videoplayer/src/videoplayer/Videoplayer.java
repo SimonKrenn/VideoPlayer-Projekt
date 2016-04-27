@@ -5,11 +5,18 @@
  */
 package videoplayer;
 
+import java.awt.Desktop;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import static javafx.application.Application.launch;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -33,6 +40,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -43,39 +51,42 @@ import javafx.util.Duration;
  */
 public class Videoplayer extends Application implements EventHandler<ActionEvent> {
 
-    Group root = new Group();
     MediaPlayer player;
+    String video;
+
     Button play = new Button("Play");
     Button pause = new Button("Pause");
     Button repeat = new Button("Repeat");
-    private Slider volumeSlider;
+    Button playlist = new Button("PlayList");
+    Slider volumeSlider;
+    Desktop desktop = Desktop.getDesktop();
     //inside that is the mediaplayer
     VBox videos = new VBox();
     //inside that are the buttons and the sliders
     VBox uiElements = new VBox();
     javafx.geometry.Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+    final FileChooser fileChooser = new FileChooser();
+    Stage mainStage;
+    Media media;
+    MediaView view;
 
     @Override
 
     public void start(final Stage stage) throws Exception {
+        mainStage = stage;
         StackPane viewing = new StackPane();
-
-        
-
         final Timeline slideIn = new Timeline();
         final Timeline slideOut = new Timeline();
         final Slider slider = new Slider();
-
-        Media media = new Media("file:///C:/Videos/GTA.mp4");
+        video = "C:/VIDEOS/CODaw.mp4";
+        media = new Media("file:///" + video);
         player = new MediaPlayer(media);
-        MediaView view = new MediaView(player);
-        player.play();
-        player.stop();
-        viewing.setMinWidth(primaryScreenBounds.getWidth());
+        view = new MediaView(player);
         
         play.setOnAction(this);
         pause.setOnAction(this);
         repeat.setOnAction(this);
+        playlist.setOnAction(this);
 
         viewing.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override
@@ -109,18 +120,18 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
         centeralignment.setMinWidth(primaryScreenBounds.getWidth() / 2 - 250);
         System.out.println(media.getWidth());
 
-        buttons.getChildren().addAll(pause, play, repeat);
+        buttons.getChildren().addAll(pause, play, repeat, playlist);
         buttAndVol.getChildren().addAll(centeralignment, buttons, volumeSlider);
         sliderAndB.getChildren().addAll(slider, buttAndVol);
 
         videos.getChildren().addAll(view);
         uiElements.getChildren().addAll(sliderAndB);
         viewing.getChildren().addAll(videos, uiElements);
-        
+
         Scene scene = new Scene(viewing, media.getWidth(), media.getHeight(), Color.BLACK);
         scene.getStylesheets().add("css/main.css");
-        stage.setScene(scene);
-        stage.show();
+        mainStage.setScene(scene);
+        mainStage.show();
 
         player.setOnReady(new Runnable() {
             @Override
@@ -137,7 +148,7 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
                 slider.setMin(0.0);
                 slider.setValue(0.0);
                 slider.setMax(player.getTotalDuration().toSeconds());
-                
+
                 slideOut.getKeyFrames().addAll(
                         new KeyFrame(new Duration(0),
                                 new KeyValue(uiElements.translateYProperty(), h - 100),
@@ -200,6 +211,43 @@ public class Videoplayer extends Application implements EventHandler<ActionEvent
         } else if (event.getSource() == repeat) {
             player.stop();
             player.play();
+        } else if (event.getSource() == playlist) {
+            openPlaylistFolder();
+            
         }
+    }
+
+    private void openPlaylistFolder() {
+        configureFileChooser(fileChooser);
+        List<File> list
+                = fileChooser.showOpenMultipleDialog(mainStage);
+        if (list != null) {
+            for (File file : list) {
+                openFile(file);
+            }
+        }
+    }
+
+    private static void configureFileChooser(final FileChooser fileChooser) {
+        fileChooser.setTitle("View Pictures");
+        fileChooser.setInitialDirectory(
+                new File(System.getProperty("user.home"))
+        );
+    }
+
+    private void openFile(File file) {
+        video = file.toString();
+        char[] swappingString = video.toCharArray();
+        for (int i = 0; i < swappingString.length; i++) {
+            if (swappingString[i] == '\\') {
+                swappingString[i] = '/';
+            }
+        }
+        video = new String(swappingString);
+        System.out.println(video);
+        player.stop();
+        media = new Media("file:///" + video);
+        player = new MediaPlayer(media);
+         view.setMediaPlayer(player);
     }
 }
