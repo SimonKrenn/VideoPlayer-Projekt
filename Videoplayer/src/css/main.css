@@ -14,17 +14,18 @@ and open the template in the editor.
 
 .button {
     -fx-min-width: 100px;
-    -fx-background-color: #6AC8FF;
+    -fx-background-color: #e74c3c;
     -fx-border-radius: 0px;
     -fx-background-radius: 0.0em;
+    -fx-opacity: 80%;
 }
 
 .button:hover {
-    -fx-background-color: #B8E6FF;
+    -fx-background-color: #ecf0f1;
 }
 
 .button:pressed {
-    -fx-background-color: #3897CE;
+    -fx-background-color: #A63125;
 }
 
 .slider {
@@ -32,7 +33,7 @@ and open the template in the editor.
 }
 
 .slider .thumb {
-    -fx-color: #6AC8FF;
+    -fx-color: #e74c3c;
     -fx-background-radius: 0.0em;
     -fx-background-insets: 0, 0, 0, 0;
 }
@@ -42,11 +43,11 @@ and open the template in the editor.
 }
 
 .slider .thumb:hover {
-    -fx-color: #B8E6FF;
+    -fx-color: #ecf0f1;
 }
 
 .slider .thumb:pressed {
-    -fx-color: #3897CE;
+    -fx-color: #A63125;
 }
 .slider:vertical .track {
     -fx-background-color:#ffcc66;
